@@ -19,4 +19,4 @@ jobs:
           cache: 'poetry'
       - name: Install dependencies
         run: make install  
-      - run: male lint
+      - run: make lint
