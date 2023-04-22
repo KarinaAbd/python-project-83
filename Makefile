@@ -1,4 +1,7 @@
-include .env
+ifndef PORT
+    include .env
+    export
+endif
 
 install:
 	poetry install
