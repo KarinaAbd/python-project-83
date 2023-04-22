@@ -1,4 +1,4 @@
-PORT ?= 8000
+include .env
 
 install:
 	poetry install
