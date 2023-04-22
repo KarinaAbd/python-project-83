@@ -1,4 +1,4 @@
-ifneq (,(.env))
+ifndef PORT
 	include .env
 	export
 endif
