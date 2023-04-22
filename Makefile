@@ -1,6 +1,6 @@
-ifndef PORT
-    include .env
-    export
+ifneq (,(.env))
+	include .env
+	export
 endif
 
 install:
