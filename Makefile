@@ -1,7 +1,4 @@
-ifndef PORT
-	include .env
-	export
-endif
+PORT ?= 8000
 
 install:
 	poetry install
