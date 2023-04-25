@@ -10,7 +10,7 @@
     </head>
     <body class="min-vh-100 d-flex flex-column">
         <header class="flex-shrink-1">
-            <nav class="navbar navbar-expand-md navbar-dark bg-dark px-3">
+            <nav class="navbar navbar-dark bg-dark px-4">
                 <a href="{{ url_for('index') }}" class="navbar-brand">Анализатор страниц</a>
                 <div>
                     <ul class="navbar-nav">
@@ -22,24 +22,6 @@
             </nav>
         </header>
 
-        {% with messages = get_flashed_messages(category_filter=["success"]) %}
-        {% if messages %}
-            {% for message in messages %}
-                    <div class="alert alert-success" role="alert">
-                        {{ message }}
-                    </div>
-            {% endfor %}
-        {% endif %}
-        {% endwith %}
-        {% with messages = get_flashed_messages(category_filter=["warning"]) %}
-        {% if messages %}
-            {% for message in messages %}
-                    <div class="alert alert-warning" role="alert">
-                        {{ message }}
-                    </div>
-            {% endfor %}
-        {% endif %}
-        {% endwith %}
         {% with messages = get_flashed_messages(category_filter=["error"]) %}
         {% if messages %}
             {% for message in messages %}

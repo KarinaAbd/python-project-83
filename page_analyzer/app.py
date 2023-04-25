@@ -38,15 +38,19 @@ def urls_post():
             with connection.cursor() as cursor:
                 try:
                     cursor.execute("INSERT INTO urls (name, created_at)\
-                                VALUES (%s, %s)", (new_url, created_at))
+                                   VALUES (%s, %s) RETURNING id",
+                                   (new_url, created_at))
+                    url_id = cursor.fetchone()[0]
                     flash('Страница добавлена!', 'success')
+
                 except psycopg2.errors.UniqueViolation:
-                    flash('Страница уже существует',
-                          'warning')
+                    url_id, new_url, created_at = find_url(url_name=new_url)
+                    flash('Страница уже существует', 'warning')
     finally:
         connection.close()
 
-    return redirect(url_for('index'))
+    return render_template('show.html', ID=url_id,
+                           name=new_url, created_at=created_at)
 
 
 def validate(url):
@@ -70,16 +74,7 @@ def all_urls():
 
 @app.route('/urls/<id>')
 def one_url(id):
-    url_info = ()
-    connection = psycopg2.connect(DATABASE_URL)
-    try:
-        with connection:
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM urls WHERE id = %s", (id, ))
-                url_info = cursor.fetchone()
-    finally:
-        connection.close()
-    url_id, url_name, url_time = url_info
+    url_id, url_name, url_time = find_url(id=id)
     return render_template('show.html', ID=url_id,
                            name=url_name, created_at=url_time)
 
@@ -87,3 +82,20 @@ def one_url(id):
 @app.route('/urls/<id>/checks', methods=['POST'])
 def check_url(id):
     pass
+
+
+def find_url(id=None, url_name=None):
+    url_info = ()
+    connection = psycopg2.connect(DATABASE_URL)
+    try:
+        with connection:
+            with connection.cursor() as cursor:
+                if id:
+                    cursor.execute("SELECT * FROM urls WHERE id = %s", (id, ))
+                elif url_name:
+                    cursor.execute("SELECT * FROM urls WHERE name = %s",
+                                   (url_name, ))
+                url_info = cursor.fetchone()
+    finally:
+        connection.close()
+    return url_info
