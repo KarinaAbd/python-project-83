@@ -28,7 +28,7 @@ def urls_post():
 
     if not validate(new_url):
         flash('Некорректный URL', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('index'), 302)
 
     created_at = datetime.now()
 

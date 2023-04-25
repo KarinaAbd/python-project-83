@@ -19,4 +19,5 @@ jobs:
           cache: poetry
       - name: Install dependencies
         run: make install  
-      - run: make lint
+      - name: Linter and tests
+        run: make all-checks
