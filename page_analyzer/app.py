@@ -51,3 +51,39 @@ def urls_post():
 
 def validate(url):
     return validators.url(url, public=True) and len(url) <= 255
+
+
+@app.route('/urls', methods=['GET'])
+def all_urls():
+    list_of_urls = []
+    connection = psycopg2.connect(DATABASE_URL)
+    try:
+        with connection:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM urls ORDER BY id DESC")
+                list_of_urls.extend(cursor.fetchall())
+    finally:
+        connection.close()
+
+    return render_template('all_urls.html', all_urls=list_of_urls)
+
+
+@app.route('/urls/<id>')
+def one_url(id):
+    url_info = ()
+    connection = psycopg2.connect(DATABASE_URL)
+    try:
+        with connection:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM urls WHERE id = %s", (id, ))
+                url_info = cursor.fetchone()
+    finally:
+        connection.close()
+    url_id, url_name, url_time = url_info
+    return render_template('show.html', ID=url_id,
+                           name=url_name, created_at=url_time)
+
+
+@app.route('/urls/<id>/checks', methods=['POST'])
+def check_url(id):
+    pass
