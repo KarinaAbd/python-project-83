@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 import psycopg2
 import validators
 from dotenv import load_dotenv
-from flask import Flask, flash, redirect, render_template, request, url_for
+from flask import Flask, flash, render_template, request
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -28,7 +28,7 @@ def urls_post():
 
     if not validate(new_url):
         flash('Некорректный URL', 'error')
-        return redirect(url_for('index'), 302)
+        return render_template('index.html'), 422
 
     created_at = datetime.now()
 
@@ -69,19 +69,27 @@ def all_urls():
     finally:
         connection.close()
 
-    return render_template('all_urls.html', all_urls=list_of_urls)
+    prepared_list_of_urls = []
+    for url in list_of_urls:
+        checks = find_checks(url[0])
+        if checks:
+            url = url + (checks[0][6], )
+            prepared_list_of_urls.append(url)
+        else:
+            prepared_list_of_urls.append(url)
+
+    return render_template('all_urls.html', all_urls=prepared_list_of_urls)
 
 
 @app.route('/urls/<id>')
 def one_url(id):
     url_id, url_name, url_time = find_url(id=id)
+
+    check_info = find_checks(id)
+
     return render_template('show.html', ID=url_id,
-                           name=url_name, created_at=url_time)
-
-
-@app.route('/urls/<id>/checks', methods=['POST'])
-def check_url(id):
-    pass
+                           name=url_name, created_at=url_time,
+                           checks=check_info)
 
 
 def find_url(id=None, url_name=None):
@@ -90,12 +98,54 @@ def find_url(id=None, url_name=None):
     try:
         with connection:
             with connection.cursor() as cursor:
-                if id:
-                    cursor.execute("SELECT * FROM urls WHERE id = %s", (id, ))
-                elif url_name:
-                    cursor.execute("SELECT * FROM urls WHERE name = %s",
-                                   (url_name, ))
-                url_info = cursor.fetchone()
+                try:
+                    if id:
+                        cursor.execute("SELECT * FROM urls WHERE id = %s",
+                                       (id, ))
+                    elif url_name:
+                        cursor.execute("SELECT * FROM urls WHERE name = %s",
+                                       (url_name, ))
+                    url_info = cursor.fetchone()
+                except psycopg2.errors.UndefinedTable:
+                    url_info = ()
     finally:
         connection.close()
     return url_info
+
+
+@app.route('/urls/<id>/checks', methods=['POST'])
+def check_url(id):
+    checked_at = datetime.now()  # date()
+
+    connection = psycopg2.connect(DATABASE_URL)
+    try:
+        with connection:
+            with connection.cursor() as cursor:
+                cursor.execute("INSERT INTO url_checks (url_id, created_at)\
+                               VALUES (%s, %s)",
+                               (id, checked_at))
+                flash('Страница успешно проверена', 'success')
+    finally:
+        connection.close()
+
+    _, url_name, url_time = find_url(id=id)
+    checks = find_checks(id)
+
+    return render_template('show.html', ID=id,
+                           name=url_name, created_at=url_time,
+                           checks=checks)
+
+
+def find_checks(url_id):
+    url_check_info = []
+    connection = psycopg2.connect(DATABASE_URL)
+    try:
+        with connection:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM url_checks WHERE url_id = %s\
+                               ORDER BY id DESC",
+                               (url_id, ))
+                url_check_info.extend(cursor.fetchall())
+    finally:
+        connection.close()
+    return url_check_info

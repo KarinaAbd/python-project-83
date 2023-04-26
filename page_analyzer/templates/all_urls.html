@@ -34,17 +34,17 @@
                                 <th>Последняя проверка</th>
                                 <th>Код ответа</th>
                             </tr>
-                            <tbody>
-                                {% for url in all_urls %}
-                                <tr>
-                                    <td>{{ url[0] }}</td>
-                                    <td><a href="{{ url_for('one_url', id=url[0]) }}">{{ url[1] }}</a></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
                         </thead>
+                        <tbody>
+                            {% for url in all_urls %}
+                            <tr>
+                                <td>{{ url[0] }}</td>
+                                <td><a href="{{ url_for('one_url', id=url[0]) }}">{{ url[1] }}</a></td>
+                                <td>{{ url[3] }}</td>
+                                <td></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
                     </table>
                 </div>
             </div>
