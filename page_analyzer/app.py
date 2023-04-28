@@ -103,7 +103,7 @@ def check_url(id: int) -> str:
     now = datetime.now()
     checked_at = str(now)[:19]  # cutting off microseconds
 
-    _, url_name, url_time = find_url(id=id)
+    _, url_name, _ = find_url(id=id)
 
     try:
         with requests.get(url_name) as response:
