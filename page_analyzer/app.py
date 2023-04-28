@@ -60,7 +60,7 @@ def validate(url):
 
 
 @app.route('/urls', methods=['GET'])
-def all_urls():
+def urls():
     list_of_urls = []
     connection = psycopg2.connect(DATABASE_URL)
     try:
@@ -81,7 +81,7 @@ def all_urls():
         else:
             prepared_list_of_urls.append(url)
 
-    return render_template('all_urls.html', all_urls=prepared_list_of_urls)
+    return render_template('list_of_urls.html', urls=prepared_list_of_urls)
 
 
 @app.route('/urls/<id>')

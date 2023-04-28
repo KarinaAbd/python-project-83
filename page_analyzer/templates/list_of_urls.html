@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <link rel= "shortcut icon" type="image/x-icon" href="../img/favicon.ico">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="description" content="Study project#3 for Hexlet.io">
@@ -15,7 +16,7 @@
                 <div>
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('all_urls') }}">Сайты</a>
+                            <a class="nav-link" href="{{ url_for('urls') }}">Сайты</a>
                         </li>
                     </ul>
                 </div>
@@ -36,7 +37,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for url in all_urls %}
+                            {% for url in urls %}
                             <tr>
                                 <td>{{ url[0] }}</td>
                                 <td><a href="{{ url_for('one_url', id=url[0]) }}">{{ url[1] }}</a></td>
