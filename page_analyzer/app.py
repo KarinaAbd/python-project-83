@@ -1,13 +1,13 @@
 import os
 from datetime import datetime
-from urllib.parse import urlparse
 
 import psycopg2
 import requests
-import validators
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from flask import Flask, flash, render_template, request
+
+from .url import normalize_url, validate_url
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -25,14 +25,14 @@ def index():
 @app.route('/urls', methods=['POST'])
 def urls_post():
     url_from_request = request.form.to_dict().get('url')
-    parsed_url = urlparse(url_from_request)
-    new_url = f'{parsed_url.scheme}://{parsed_url.netloc}'
+    new_url = normalize_url(url_from_request)
 
-    if not validate(new_url):
+    if not validate_url(new_url):
         flash('Некорректный URL', 'error')
         return render_template('index.html'), 422
 
-    created_at = datetime.now()
+    now = datetime.now()
+    created_at = str(now)[:19]
 
     connection = psycopg2.connect(DATABASE_URL)
     try:
@@ -43,7 +43,7 @@ def urls_post():
                                    VALUES (%s, %s) RETURNING id",
                                    (new_url, created_at))
                     url_id = cursor.fetchone()[0]
-                    flash('Страница добавлена!', 'success')
+                    flash('Страница успешно добавлена', 'success')
 
                 except psycopg2.errors.UniqueViolation:
                     url_id, new_url, created_at = find_url(url_name=new_url)
@@ -52,11 +52,8 @@ def urls_post():
         connection.close()
 
     return render_template('show.html', ID=url_id,
-                           name=new_url, created_at=created_at)
-
-
-def validate(url):
-    return validators.url(url, public=True) and len(url) <= 255
+                           name=new_url, created_at=created_at,
+                           checks=find_checks(url_id))
 
 
 @app.route('/urls', methods=['GET'])
@@ -118,7 +115,8 @@ def find_url(id=None, url_name=None):
 
 @app.route('/urls/<id>/checks', methods=['POST'])
 def check_url(id):
-    checked_at = datetime.now()  # date()
+    now = datetime.now()
+    checked_at = str(now)[:19]
 
     _, url_name, url_time = find_url(id=id)
 
@@ -135,11 +133,12 @@ def check_url(id):
     soup = BeautifulSoup(r.text, 'html.parser')
     url_h1 = soup.h1.get_text() if soup.h1 else ''
     url_title = soup.title.get_text() if soup.title else ''
+    description = ''
+
     if soup.find('meta', attrs={'name': 'description'}):
         description = soup.find('meta', {'name': 'description'})['content']
-
-    if len(description) > 193:
-        description = description[:193] + '...'
+        if len(description) > 193:
+            description = description[:193] + '...'
 
     connection = psycopg2.connect(DATABASE_URL)
     try:
