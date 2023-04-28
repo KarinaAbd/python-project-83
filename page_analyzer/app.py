@@ -3,12 +3,12 @@ from datetime import datetime
 
 import psycopg2
 import requests
-from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 
 from .finder import find_checks, find_url
 from .url import normalize_url, validate_url
+from .parser import parser
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -16,8 +16,6 @@ SECRET = os.getenv('SECRET_KEY')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET
-
-LEN_OF_DESCRIPTION = 190
 
 
 @app.route('/')
@@ -115,16 +113,7 @@ def check_url(id: int) -> str:
         flash('Произошла ошибка при проверке', 'alert-danger')
         return redirect(url_for('one_url', id=id), 422)
 
-    soup = BeautifulSoup(response.text, 'html.parser')
-    url_h1 = soup.h1.get_text() if soup.h1 else ''
-    url_title = soup.title.get_text() if soup.title else ''
-    description = ''
-
-    if soup.find('meta', attrs={'name': 'description'}):
-        description = soup.find('meta', {'name': 'description'})['content']
-        if len(description) > LEN_OF_DESCRIPTION:
-            description = description[:LEN_OF_DESCRIPTION] + '...'
-
+    url_h1, url_title, description = parser(response)
     connection = psycopg2.connect(DATABASE_URL)
     try:
         with connection:
