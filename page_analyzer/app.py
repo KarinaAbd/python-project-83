@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 import psycopg2
 import requests
 import validators
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from flask import Flask, flash, render_template, request
 
@@ -124,19 +125,31 @@ def check_url(id):
     try:
         with requests.get(url_name) as r:
             status_code = r.status_code
+
     except requests.exceptions.RequestException:
         flash('Произошла ошибка при проверке', 'error')
         return render_template('show.html', ID=id,
                                name=url_name, created_at=url_time,
                                checks=find_checks(id)), 422
 
+    soup = BeautifulSoup(r.text, 'html.parser')
+    url_h1 = soup.h1.get_text() if soup.h1 else ''
+    url_title = soup.title.get_text() if soup.title else ''
+    if soup.find('meta', attrs={'name': 'description'}):
+        description = soup.find('meta', {'name': 'description'})['content']
+
+    if len(description) > 193:
+        description = description[:193] + '...'
+
     connection = psycopg2.connect(DATABASE_URL)
     try:
         with connection:
             with connection.cursor() as cursor:
                 cursor.execute("INSERT INTO url_checks (url_id, status_code,\
-                               created_at) VALUES (%s, %s, %s)",
-                               (id, status_code, checked_at))
+                               h1, title, description, created_at)\
+                               VALUES (%s, %s, %s, %s, %s, %s)",
+                               (id, status_code, url_h1,
+                                url_title, description, checked_at))
                 flash('Страница успешно проверена', 'success')
     finally:
         connection.close()
