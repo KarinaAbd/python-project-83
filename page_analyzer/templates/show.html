@@ -42,6 +42,16 @@
         {% endif %}
         {% endwith %}
 
+        {% with messages = get_flashed_messages(category_filter=["error"]) %}
+        {% if messages %}
+            {% for message in messages %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ message }}
+                    </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
         <main class="flex-grow-1">
             <div class="container-lg mt-3">
                 <h1>Сайт: {{ name }}</h1>
@@ -83,7 +93,7 @@
                             {% for check in checks %}
                                 <tr>
                                     <td>{{ check[0] }}</td>
-                                    <td></td>
+                                    <td>{{ check[2] }}</td>
                                     <td></td>
                                     <td></td>
                                     <td></td>

@@ -3,6 +3,7 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 import psycopg2
+import requests
 import validators
 from dotenv import load_dotenv
 from flask import Flask, flash, render_template, request
@@ -74,6 +75,7 @@ def all_urls():
         checks = find_checks(url[0])
         if checks:
             url = url + (checks[0][6], )
+            url = url + (checks[0][2], )
             prepared_list_of_urls.append(url)
         else:
             prepared_list_of_urls.append(url)
@@ -117,18 +119,28 @@ def find_url(id=None, url_name=None):
 def check_url(id):
     checked_at = datetime.now()  # date()
 
+    _, url_name, url_time = find_url(id=id)
+
+    try:
+        with requests.get(url_name) as r:
+            status_code = r.status_code
+    except requests.exceptions.RequestException:
+        flash('Произошла ошибка при проверке', 'error')
+        return render_template('show.html', ID=id,
+                               name=url_name, created_at=url_time,
+                               checks=find_checks(id)), 422
+
     connection = psycopg2.connect(DATABASE_URL)
     try:
         with connection:
             with connection.cursor() as cursor:
-                cursor.execute("INSERT INTO url_checks (url_id, created_at)\
-                               VALUES (%s, %s)",
-                               (id, checked_at))
+                cursor.execute("INSERT INTO url_checks (url_id, status_code,\
+                               created_at) VALUES (%s, %s, %s)",
+                               (id, status_code, checked_at))
                 flash('Страница успешно проверена', 'success')
     finally:
         connection.close()
 
-    _, url_name, url_time = find_url(id=id)
     checks = find_checks(id)
 
     return render_template('show.html', ID=id,
