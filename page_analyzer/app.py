@@ -106,7 +106,7 @@ def check_url(id: int) -> str:
     try:
         with requests.get(url_name) as response:
             status_code = response.status_code
-            if status_code == 425:
+            if status_code != 200:
                 response.raise_for_status()
 
     except requests.exceptions.RequestException:
