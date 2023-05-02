@@ -5,13 +5,12 @@
 [![Python CI](https://github.com/KarinaAbd/python-project-83/actions/workflows/pyci.yaml/badge.svg)](https://github.com/KarinaAbd/python-project-83/actions/workflows/pyci.yaml)
 [![Maintainability](https://api.codeclimate.com/v1/badges/a658a6b18675ea8a3dac/maintainability)](https://codeclimate.com/github/KarinaAbd/python-project-83/maintainability)
 
-[Page Analyzer](https://python-project-83-production-8442.up.railway.app/)
+try [Page Analyzer](python-project-83-production-050e.up.railway.app) yourself
+***
 
-This repository was created as part of [a Hexlet study project](https://ru.hexlet.io/programs/python/projects/83). "Page Analyzer" is a a website that analyzes the web-pages for SEO suitability. Its capabilities:
+![tutorial](./page_analyzer.gif)
 
-    Files could be in json or yaml formats, data in files could be flat or nested
-    Package coud be used as CLI utility or library
-    Printing of differnces is possible in 3 formats: stylish (default), plain or json
+This repository was created as part of [a Hexlet study project](https://ru.hexlet.io/programs/python/projects/83). "Page Analyzer" is a a website that analyzes the web-pages for SEO suitability.
 
 ## How to install
 
@@ -23,4 +22,4 @@ make install
 ```
 
 ## How to develop
-The project uses [a database PostrgreSQL](https://www.postgresql.org/), make sure it is installed on your computer and the database server is started. For further configuration, use the command ```make database```. Next, you can use the command ```make dev``` to launch the application on the localhost with active de bugger or the command ```make start``` to deploy it on production.
+The project uses [a database PostrgreSQL](https://www.postgresql.org/), make sure it is installed on your computer and the database server is started. For further configuration, use the command ```make database```. Next, you can use the command ```make dev``` to launch the application on the localhost with active debugger or the command ```make start``` to deploy it on production.
