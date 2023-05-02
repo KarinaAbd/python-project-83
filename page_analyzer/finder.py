@@ -4,12 +4,12 @@ from datetime import datetime
 import psycopg2
 from dotenv import load_dotenv
 
-
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
 def find_url(id: int = None, name: str = None) -> tuple[int, str, datetime]:
+    """Find a record in the database table 'url' by id or url's name."""
     connection = psycopg2.connect(DATABASE_URL)
     try:
         with connection:
@@ -28,6 +28,7 @@ def find_url(id: int = None, name: str = None) -> tuple[int, str, datetime]:
 
 
 def find_checks(url_id: int) -> list[tuple[int, str, datetime]]:
+    """Find a record in the database table 'url_checks' by url's id."""
     url_check_info = []
     connection = psycopg2.connect(DATABASE_URL)
     try:

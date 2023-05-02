@@ -6,9 +6,11 @@ MAX_URL_LEN = 255
 
 
 def normalize_url(url: str) -> str:
+    """Truncates the URL to the <protocol>://<domain name> structure"""
     parsed_url = urlparse(url)
     return f'{parsed_url.scheme}://{parsed_url.netloc}'
 
 
 def validate_url(url: str) -> bool:
+    """Validate url by rules (https://gist.github.com/dperini/729294)."""
     return validators.url(url, public=True) and len(url) <= MAX_URL_LEN
