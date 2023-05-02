@@ -30,7 +30,7 @@ def urls_post() -> str:
 
     if not validate_url(new_url):
         flash('Некорректный URL', 'alert-danger')
-        return redirect(url_for('index'), code=422)
+        return render_template('index.html'), 422
 
     now = datetime.now()
     created_at = str(now)[:19]  # cutting off microseconds
@@ -81,7 +81,7 @@ def urls() -> str:
     return render_template('list_of_urls.html', urls=list_of_urls)
 
 
-@app.route('/urls/<int:id>')
+@app.route('/urls/<int:id>', methods=['GET'])
 def one_url(id: int) -> str:
     url_info = find_url(id=id)
 
@@ -101,7 +101,7 @@ def check_url(id: int) -> str:
     now = datetime.now()
     checked_at = str(now)[:19]  # cutting off microseconds
 
-    _, url_name, _ = find_url(id=id)
+    _, url_name, url_creating_time = find_url(id=id)
 
     try:
         with requests.get(url_name) as response:
@@ -111,9 +111,11 @@ def check_url(id: int) -> str:
 
     except requests.exceptions.RequestException:
         flash('Произошла ошибка при проверке', 'alert-danger')
-        return redirect(url_for('one_url', id=id), 422)
+        return render_template('show.html', ID=id, name=url_name,
+                               created_at=url_creating_time,
+                               checks=find_checks(id)), 422
 
-    url_h1, url_title, description = parser(response)
+    h1, title, description = parser(response)
     connection = psycopg2.connect(DATABASE_URL)
     try:
         with connection:
@@ -121,8 +123,8 @@ def check_url(id: int) -> str:
                 cursor.execute("INSERT INTO url_checks (url_id, status_code,\
                                h1, title, description, created_at)\
                                VALUES (%s, %s, %s, %s, %s, %s)",
-                               (id, status_code, url_h1,
-                                url_title, description, checked_at))
+                               (id, status_code, h1,
+                                title, description, checked_at))
                 flash('Страница успешно проверена', 'alert-success')
     finally:
         connection.close()
@@ -131,5 +133,5 @@ def check_url(id: int) -> str:
 
 
 @app.errorhandler(psycopg2.OperationalError)
-def special_exception_handler(error):
+def special_exception_handler(error) -> str:
     return render_template('error.html'), 500
