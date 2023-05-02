@@ -1,9 +1,17 @@
 [tool.poetry]
 name = "hexlet-code"
 version = "0.1.0"
-description = ""
+description = "Study project No. 3 'Page Analyzer'"
 authors = ["KarinA <abdullaeva.karina.r@gmail.com>"]
 readme = "README.md"
+repository = "https://github.com/KarinaAbd/python-project-83"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Web Environment",
+    "Framework :: Flask",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Application"
+]
 packages = [{include = "page_analyzer"}]
 
 [tool.poetry.dependencies]
