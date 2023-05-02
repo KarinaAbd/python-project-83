@@ -5,3 +5,5 @@ __pycache__/
 .vscode/
 .coverage
 .pytest_cache
+./tests/test_finder.py
+./tests/test_parsers.py
