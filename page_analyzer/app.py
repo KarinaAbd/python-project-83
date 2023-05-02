@@ -47,14 +47,12 @@ def urls_post() -> str:
                     flash('Страница успешно добавлена', 'alert-success')
 
                 except psycopg2.errors.UniqueViolation:
-                    url_id, _, created_at = find_url(name=new_url)
+                    url_id, _, _ = find_url(name=new_url)
                     flash('Страница уже существует', 'alert-warning')
     finally:
         connection.close()
 
-    return render_template('show.html', ID=url_id,
-                           name=new_url, created_at=created_at,
-                           checks=find_checks(url_id))
+    return redirect(url_for('one_url', id=url_id))
 
 
 @app.route('/urls', methods=['GET'])
