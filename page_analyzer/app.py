@@ -7,7 +7,7 @@ import requests
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 
-from .finder import connect, find_checks, find_url
+from .data import connect, find_checks, find_url
 from .parser import parser
 from .url import normalize_url, validate_url
 
@@ -72,7 +72,7 @@ def urls() -> str:
         else:
             continue
 
-    return render_template('list_of_urls.html', urls=urls)
+    return render_template('all_urls.html', urls=urls)
 
 
 @app.route('/urls/<int:id>', methods=['GET'])
