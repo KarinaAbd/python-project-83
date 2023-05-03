@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 
-
 LEN_OF_DESCRIPTION = 190
 
 

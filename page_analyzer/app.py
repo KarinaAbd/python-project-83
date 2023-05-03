@@ -68,10 +68,15 @@ def urls() -> str:
         checks = find_checks(url.id)
         if checks:
             # adding info about url's last check
-            urls[i] = url + (checks[0].created_at, checks[0].status_code)
+            urls[i] = {
+                'id': url.id,
+                'name': url.name,
+                'checked_at': checks[0].created_at,
+                'status_code': checks[0].status_code
+            }
         else:
             continue
-
+    print(urls[15])
     return render_template('all_urls.html', urls=urls)
 
 
