@@ -34,7 +34,7 @@ def urls_post() -> str:
 
     new_url = normalize_url(url_from_request)
     now = datetime.now()
-    created_at = str(now)[:19]  # cutting off microseconds
+    created_at = now.strftime("%Y-%m-%d %H:%M:%S")
 
     with connect() as connection:
         with connection.cursor(cursor_factory=NamedTupleCursor) as cursor:
@@ -96,7 +96,7 @@ def one_url(id: int) -> str:
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def check_url(id: int) -> str:
     now = datetime.now()
-    checked_at = str(now)[:19]  # cutting off microseconds
+    checked_at = now.strftime("%Y-%m-%d %H:%M:%S")
 
     url = find_url(id=id)
 
