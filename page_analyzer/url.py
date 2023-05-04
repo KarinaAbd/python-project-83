@@ -13,4 +13,4 @@ def normalize_url(url: str) -> str:
 
 def validate_url(url: str) -> bool:
     """Validate url by rules (https://gist.github.com/dperini/729294)."""
-    return validators.url(url, public=True) and len(url) <= MAX_URL_LEN
+    return validators.url(url) and len(url) <= MAX_URL_LEN
