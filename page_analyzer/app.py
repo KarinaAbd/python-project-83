@@ -76,7 +76,6 @@ def urls() -> str:
             }
         else:
             continue
-    print(urls[15])
     return render_template('all_urls.html', urls=urls)
 
 
