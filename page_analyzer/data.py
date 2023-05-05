@@ -9,13 +9,13 @@ load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
-def connect():
+def get_connected():
     return psycopg2.connect(DATABASE_URL)
 
 
 def find_url(id: int = None, name: str = None) -> tuple[int, str, datetime]:
     """Find a record in the database table 'url' by id or url's name."""
-    with connect() as connection:
+    with get_connected() as connection:
         with connection.cursor(cursor_factory=NamedTupleCursor) as cursor:
             if id:
                 cursor.execute("SELECT * FROM urls WHERE id = %s",
@@ -30,13 +30,13 @@ def find_url(id: int = None, name: str = None) -> tuple[int, str, datetime]:
 
 def find_checks(url_id: int) -> list[tuple[int, str, datetime]]:
     """Find a record in the database table 'url_checks' by url's id."""
-    url_check_info = []
+    url_checks = []
 
-    with connect() as connection:
+    with get_connected() as connection:
         with connection.cursor(cursor_factory=NamedTupleCursor) as cursor:
             cursor.execute("SELECT * FROM url_checks WHERE url_id = %s\
                            ORDER BY id DESC",
                            (url_id, ))
-            url_check_info.extend(cursor.fetchall())
+            url_checks.extend(cursor.fetchall())
 
-    return url_check_info
+    return url_checks

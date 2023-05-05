@@ -7,8 +7,8 @@ import requests
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 
-from .data import connect, find_checks, find_url
-from .parser import parser
+from .data import get_connected, find_checks, find_url
+from .parser import get_seo_data
 from .url import normalize_url, validate_url
 
 load_dotenv()
@@ -36,14 +36,14 @@ def urls_post() -> str:
     now = datetime.now()
     created_at = now.strftime("%Y-%m-%d %H:%M:%S")
 
-    with connect() as connection:
+    with get_connected() as connection:
         with connection.cursor(cursor_factory=NamedTupleCursor) as cursor:
             try:
                 cursor.execute("INSERT INTO urls (name, created_at)\
                                 VALUES (%s, %s) RETURNING id",
                                (new_url, created_at))
                 url_info = cursor.fetchone()
-                url_id = url_info.id  # accessing id from named tuple
+                url_id = url_info.id
                 flash('Страница успешно добавлена', 'alert-success')
 
             except psycopg2.errors.UniqueViolation:
@@ -58,16 +58,14 @@ def urls_post() -> str:
 def urls() -> str:
     urls = []
 
-    with connect() as connection:
+    with get_connected() as connection:
         with connection.cursor(cursor_factory=NamedTupleCursor) as cursor:
             cursor.execute("SELECT * FROM urls ORDER BY id DESC")
             urls.extend(cursor.fetchall())
 
     for i, url in enumerate(urls):
-        # accessing info about url's checks by url_id
         checks = find_checks(url.id)
         if checks:
-            # adding info about url's last check
             urls[i] = {
                 'id': url.id,
                 'name': url.name,
@@ -111,9 +109,9 @@ def check_url(id: int) -> str:
                                created_at=url.created_at,
                                checks=find_checks(id)), 422
 
-    h1, title, description = parser(response)
+    h1, title, description = get_seo_data(response)
 
-    with connect() as connection:
+    with get_connected() as connection:
         with connection.cursor() as cursor:
             cursor.execute("INSERT INTO url_checks (url_id, status_code,\
                            h1, title, description, created_at)\
