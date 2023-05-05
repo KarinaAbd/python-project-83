@@ -28,6 +28,9 @@ def index() -> str:
 def urls_post() -> str:
     url_from_request = request.form.to_dict().get('url')
 
+    if url_from_request is None:
+        url_from_request = ''
+
     if not validate_url(url_from_request):
         flash('Некорректный URL', 'alert-danger')
         return render_template('index.html'), 422
