@@ -26,10 +26,7 @@ def index() -> str:
 
 @app.route('/urls', methods=['POST'])
 def urls_post() -> str:
-    url_from_request = request.form.to_dict().get('url')
-
-    if url_from_request is None:
-        url_from_request = ''
+    url_from_request = request.form.to_dict().get('url', '')
 
     if not validate_url(url_from_request):
         flash('Некорректный URL', 'alert-danger')
