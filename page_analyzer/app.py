@@ -7,7 +7,8 @@ import requests
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 
-from .data import get_connected, find_checks, find_url
+from .data import get_connected, find_by_id, find_by_name
+from .data import find_checks, find_last_check
 from .parser import get_seo_data
 from .url import normalize_url, validate_url
 
@@ -47,7 +48,7 @@ def urls_post() -> str:
                 flash('Страница успешно добавлена', 'alert-success')
 
             except psycopg2.errors.UniqueViolation:
-                url = find_url(name=new_url)
+                url = find_by_name(new_url)
                 url_id = url.id
                 flash('Страница уже существует', 'alert-warning')
 
@@ -64,13 +65,13 @@ def urls() -> str:
             urls.extend(cursor.fetchall())
 
     for i, url in enumerate(urls):
-        checks = find_checks(url.id)
-        if checks:
+        check = find_last_check(url.id)
+        if check:
             urls[i] = {
                 'id': url.id,
                 'name': url.name,
-                'checked_at': checks[0].created_at,
-                'status_code': checks[0].status_code
+                'checked_at': check.created_at,
+                'status_code': check.status_code
             }
         else:
             continue
@@ -79,7 +80,7 @@ def urls() -> str:
 
 @app.route('/urls/<int:id>', methods=['GET'])
 def one_url(id: int) -> str:
-    url = find_url(id=id)
+    url = find_by_id(id)
 
     if url is None:
         flash('Такой страницы не существует', 'alert-warning')
@@ -95,7 +96,7 @@ def check_url(id: int) -> str:
     now = datetime.now()
     checked_at = now.strftime("%Y-%m-%d %H:%M:%S")
 
-    url = find_url(id=id)
+    url = find_by_id(id)
 
     try:
         with requests.get(url.name) as response:
