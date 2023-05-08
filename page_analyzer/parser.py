@@ -1,7 +1,5 @@
 from bs4 import BeautifulSoup
 
-# LEN_OF_DESCRIPTION = 190
-
 
 def get_seo_data(page: object) -> tuple[str]:
     """
@@ -19,8 +17,5 @@ def get_seo_data(page: object) -> tuple[str]:
 
     if soup.find('meta', attrs={'name': 'description'}):
         description = soup.find('meta', {'name': 'description'})['content']
-
-        # if len(description) > LEN_OF_DESCRIPTION:
-        # description = description[:LEN_OF_DESCRIPTION] + '...'
 
     return h1, title, description
