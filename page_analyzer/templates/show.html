@@ -41,8 +41,8 @@
                     <tr>
                         <td>{{ check.id }}</td>
                         <td>{{ check.status_code }}</td>
-                        <td>{{ check.h1 }}</td>
-                        <td>{{ check.title }}</td>
+                        <td>{{ check.h1 | truncate(190) }}</td>
+                        <td>{{ check.title | truncate(190) }}</td>
                         <td>{{ check.description | truncate(190) }}</td>
                         <td>{{ check.created_at }}</td>
                     </tr>
@@ -52,3 +52,4 @@
         </div>
     </div>
 {% endblock %}
+
