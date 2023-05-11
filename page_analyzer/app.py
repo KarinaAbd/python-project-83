@@ -101,8 +101,7 @@ def check_url(id: int) -> str:
     try:
         with requests.get(url.name) as response:
             status_code = response.status_code
-            if status_code != 200:
-                response.raise_for_status()
+            response.raise_for_status()
 
     except requests.exceptions.RequestException:
         flash('Произошла ошибка при проверке', 'alert-danger')
