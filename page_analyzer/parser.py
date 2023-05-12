@@ -1,21 +1,29 @@
 from bs4 import BeautifulSoup
 
 
-def get_seo_data(page: object) -> tuple[str]:
+def prepare_html(page: object) -> object:
     """
-    Parse webpage content and return values of
-    tags <h1> and <title>, and value of attribute
-    content of tag <meta name="description" content="...">.
+    Convert webpage content into nested data structure.
 
     :param page: The Response object, which contains
     a server's response to an HTTP request.
     """
-    soup = BeautifulSoup(page.text, 'html.parser')
-    h1 = soup.h1.get_text() if soup.h1 else ''
-    title = soup.title.get_text() if soup.title else ''
-    description = ''
+    return BeautifulSoup(page.text, 'html.parser')
 
-    if soup.find('meta', attrs={'name': 'description'}):
-        description = soup.find('meta', {'name': 'description'})['content']
 
-    return h1, title, description
+def get_seo_data(html: object) -> tuple[str]:
+    """
+    Parse html content and return values of
+    tags <h1> and <title>, and value of attribute
+    content of tag <meta name="description" content="...">.
+
+    :param html: The BeautifulSoup object, which represents
+    the document as a nested data structure.
+    """
+    h1 = html.h1.get_text() if html.h1 else ''
+    title = html.title.get_text() if html.title else ''
+
+    description = html.find('meta', {'name': 'description'})
+    description_content = description['content'] if description else ''
+
+    return h1, title, description_content

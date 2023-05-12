@@ -9,7 +9,7 @@ from flask import Flask, flash, redirect, render_template, request, url_for
 
 from .data import get_connected, find_by_id, find_by_name
 from .data import find_checks, find_last_check
-from .parser import get_seo_data
+from .parser import prepare_html, get_seo_data
 from .url import normalize_url, validate_url
 
 load_dotenv()
@@ -112,7 +112,7 @@ def check_url(id: int) -> str:
                                created_at=url.created_at,
                                checks=find_checks(id)), 422
 
-    h1, title, description = get_seo_data(response)
+    h1, title, description = get_seo_data(prepare_html(response))
 
     with get_connected() as connection:
         with connection.cursor() as cursor:
