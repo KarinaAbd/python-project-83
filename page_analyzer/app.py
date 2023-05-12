@@ -28,8 +28,11 @@ def index() -> str:
 @app.route('/urls', methods=['POST'])
 def urls_post() -> str:
     url_from_request = request.form.to_dict().get('url', '')
+    validation_code = validate_url(url_from_request)
 
-    if not validate_url(url_from_request):
+    if validation_code < 1:
+        if validation_code == 0:
+            flash('URL обязателен', 'alert-danger')
         flash('Некорректный URL', 'alert-danger')
         return render_template('index.html'), 422
 
