@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
 
 from .data import get_connected, find_by_id, find_by_name
-from .data import find_checks, find_last_check
+from .data import find_checks, find_all_urls
 from .parser import prepare_html, get_seo_data
 from .url import normalize_url, validate_url
 
@@ -60,24 +60,7 @@ def urls_post() -> str:
 
 @app.route('/urls', methods=['GET'])
 def urls() -> str:
-    urls = []
-
-    with get_connected() as connection:
-        with connection.cursor(cursor_factory=NamedTupleCursor) as cursor:
-            cursor.execute("SELECT * FROM urls ORDER BY id DESC")
-            urls.extend(cursor.fetchall())
-
-    for i, url in enumerate(urls):
-        check = find_last_check(url.id)
-        if check:
-            urls[i] = {
-                'id': url.id,
-                'name': url.name,
-                'checked_at': check.created_at,
-                'status_code': check.status_code
-            }
-        else:
-            continue
+    urls = find_all_urls()
     return render_template('all_urls.html', urls=urls)
 
 
