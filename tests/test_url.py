@@ -13,8 +13,8 @@ def test_normalize_url(url, expected):
 
 
 @pytest.mark.parametrize('url, expected', [
-    ('https://github.com', True),
-    ('https://www.youtube.com', True)
+    ('https://github.com', []),
+    ('https://www.youtube.com', [])
 ])
 def test_validate_url(url, expected):
     assert expected == validate_url(url)
