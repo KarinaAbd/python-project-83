@@ -11,8 +11,13 @@ def normalize_url(url: str) -> str:
     return f'{parsed_url.scheme}://{parsed_url.netloc}'
 
 
-def validate_url(url: str) -> bool:
+def validate_url(url: str) -> list[str]:
     """Validate url by rules (https://gist.github.com/dperini/729294)."""
+    errors = []
     if url == '':
-        return 0
-    return 1 if validators.url(url) and len(url) <= MAX_URL_LEN else -1
+        errors.append('No url')
+
+    if errors or not validators.url(url) or len(url) > MAX_URL_LEN:
+        errors.append('Not valid url')
+
+    return errors

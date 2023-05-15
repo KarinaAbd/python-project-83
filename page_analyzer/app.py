@@ -2,14 +2,15 @@ import os
 from datetime import datetime
 
 import psycopg2
-from psycopg2.extras import NamedTupleCursor
 import requests
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, url_for
+from psycopg2.extras import NamedTupleCursor
 
-from .data import get_connected, find_by_id, find_by_name
-from .data import find_checks, find_all_urls
-from .parser import prepare_html, get_seo_data
+from .data import (find_all_urls, find_by_id, find_by_name, find_checks,
+                   get_connected)
+from .parser import get_seo_data
 from .url import normalize_url, validate_url
 
 load_dotenv()
@@ -28,24 +29,23 @@ def index() -> str:
 @app.route('/urls', methods=['POST'])
 def urls_post() -> str:
     url_from_request = request.form.to_dict().get('url', '')
-    validation_code = validate_url(url_from_request)
+    errors = validate_url(url_from_request)
 
-    if validation_code < 1:
-        if validation_code == 0:
-            flash('URL обязателен', 'alert-danger')
+    if 'Not valid url' in errors:
         flash('Некорректный URL', 'alert-danger')
+        if 'No url' in errors:
+            flash('URL обязателен', 'alert-danger')
         return render_template('index.html'), 422
 
     new_url = normalize_url(url_from_request)
-    now = datetime.now()
-    created_at = now.strftime("%Y-%m-%d %H:%M:%S")
 
     with get_connected() as connection:
         with connection.cursor(cursor_factory=NamedTupleCursor) as cursor:
             try:
                 cursor.execute("INSERT INTO urls (name, created_at)\
                                 VALUES (%s, %s) RETURNING id",
-                               (new_url, created_at))
+                               (new_url,
+                                datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
                 url_info = cursor.fetchone()
                 url_id = url_info.id
                 flash('Страница успешно добавлена', 'alert-success')
@@ -79,9 +79,6 @@ def one_url(id: int) -> str:
 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def check_url(id: int) -> str:
-    now = datetime.now()
-    checked_at = now.strftime("%Y-%m-%d %H:%M:%S")
-
     url = find_by_id(id)
 
     try:
@@ -95,7 +92,9 @@ def check_url(id: int) -> str:
                                created_at=url.created_at,
                                checks=find_checks(id)), 422
 
-    h1, title, description = get_seo_data(prepare_html(response))
+    h1, title, description = get_seo_data(
+        BeautifulSoup(response.text, 'html.parser')
+    )
 
     with get_connected() as connection:
         with connection.cursor() as cursor:
@@ -103,7 +102,8 @@ def check_url(id: int) -> str:
                            h1, title, description, created_at)\
                            VALUES (%s, %s, %s, %s, %s, %s)",
                            (id, status_code, h1,
-                            title, description, checked_at))
+                            title, description,
+                            datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
             flash('Страница успешно проверена', 'alert-success')
 
     return redirect(url_for('one_url', id=id))

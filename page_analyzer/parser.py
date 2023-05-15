@@ -1,16 +1,3 @@
-from bs4 import BeautifulSoup
-
-
-def prepare_html(page: object) -> object:
-    """
-    Convert webpage content into nested data structure.
-
-    :param page: The Response object, which contains
-    a server's response to an HTTP request.
-    """
-    return BeautifulSoup(page.text, 'html.parser')
-
-
 def get_seo_data(html: object) -> tuple[str]:
     """
     Parse html content and return values of
