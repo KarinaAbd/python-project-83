@@ -11,12 +11,6 @@ lint:
 check:
 	poetry check
 
-test:
-	poetry run pytest
-
-test-cov:
-	poetry run pytest --cov
-
 dev:
 	poetry run flask --app page_analyzer:app --debug run
 
